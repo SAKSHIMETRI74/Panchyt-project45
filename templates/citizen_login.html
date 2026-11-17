@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ t('citizen_login_title') }}{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ t('citizen_login_title') }}</h1>
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="login" type="button">{{ t('tab_login') }}</button>
+    <button class="tab" data-tab="register" type="button">{{ t('tab_register') }}</button>
+  </div>
+
+  <form id="loginForm" class="panel active" data-panel="login" autocomplete="on">
+    <label>{{ t('lbl_phone') }}
+      <input name="phone" type="tel" inputmode="numeric" maxlength="14" required autocomplete="tel" placeholder="98XXXXXXXX">
+    </label>
+    <label>{{ t('lbl_password') }}
+      <input name="password" type="password" required autocomplete="current-password">
+    </label>
+    <input type="hidden" name="portal" value="citizen">
+    <button class="btn btn-primary btn-block" type="submit">{{ t('btn_login') }}</button>
+  </form>
+
+  <div class="panel" data-panel="register">
+    <ol class="steps"><li data-step="1" class="on">{{ t('step_phone') }}</li><li data-step="2">{{ t('step_otp') }}</li><li data-step="3">{{ t('step_details') }}</li></ol>
+
+    <form id="otpSendForm" class="step" data-step="1">
+      <label>{{ t('lbl_phone') }}
+        <input name="phone" type="tel" inputmode="numeric" maxlength="14" required placeholder="98XXXXXXXX">
+      </label>
+      <button class="btn btn-primary btn-block" type="submit">{{ t('btn_send_otp') }}</button>
+    </form>
+
+    <form id="otpVerifyForm" class="step hidden" data-step="2">
+      {% if demo_sms %}<div id="demoOtp" class="notice hidden" data-prefix="{{ t('demo_otp_notice') }}"></div>{% endif %}
+      <label>{{ t('lbl_otp') }}
+        <input name="otp" inputmode="numeric" maxlength="6" pattern="\d{6}" required autocomplete="one-time-code">
+      </label>
+      <button class="btn btn-primary btn-block" type="submit">{{ t('btn_verify_otp') }}</button>
+      <button class="btn btn-link" type="button" id="backToPhone">{{ t('btn_back') }}</button>
+    </form>
+
+    <form id="registerForm" class="step hidden" data-step="3">
+      <p class="ok-text">✔ {{ t('lbl_verified') }}</p>
+      <label>{{ t('lbl_fullname') }}
+        <input name="full_name" required minlength="3" maxlength="100" placeholder="{{ t('lbl_name_ph') }}" autocomplete="name">
+      </label>
+      <label>{{ t('lbl_ward') }}
+        <select name="ward">{% for w in WARD_CHOICES %}<option>{{ w }}</option>{% endfor %}</select>
+      </label>
+      <label>{{ t('lbl_new_password') }}
+        <input name="password" type="password" required minlength="6" autocomplete="new-password">
+      </label>
+      <button class="btn btn-primary btn-block" type="submit">{{ t('btn_register') }}</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

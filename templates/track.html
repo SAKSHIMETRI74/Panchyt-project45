@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ t('track_title') }}{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>🔍 {{ t('track_title') }}</h1>
+  <form id="trackForm" class="inline-form">
+    <input name="q" value="{{ query }}" placeholder="{{ t('track_ph') }}" required maxlength="40" aria-label="{{ t('lbl_tracking_id') }}">
+    <button class="btn btn-primary" type="submit">{{ t('btn_track') }}</button>
+  </form>
+  <div id="trackResult" data-auto="{{ query }}" data-notfound="{{ t('no_record') }}"
+       data-statuses='{{ {"Pending": t("status_pending"), "In Progress": t("status_progress"), "Resolved": t("status_resolved"), "Rejected": t("status_rejected")}|tojson|forceescape }}'
+       data-labels='{{ {"remarks": t("lbl_remarks"), "timeline": t("lbl_timeline"), "loading": t("loading")}|tojson|forceescape }}'></div>
+</section>
+{% endblock %}

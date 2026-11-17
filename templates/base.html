@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ t('portal_title') }}{% endblock %}</title>
+  <meta name="description" content="{{ t('portal_subtitle') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="lang-{{ lang }}">
+<div class="tricolor"><i></i><i></i><i></i></div>
+<div class="ticker">📞 {{ t('help_ticker') }}{% if helpline %}: <strong>{{ helpline }}</strong>{% endif %}</div>
+
+<header class="site-header">
+  <div class="container header-row">
+    <a class="brand" href="{{ url_for('index') }}">
+      <span class="emblem">🏛️</span>
+      <span class="brand-text"><strong>{{ t('portal_title') }}</strong><small>{{ t('portal_subtitle') }}</small></span>
+    </a>
+    <nav class="nav">
+      <a href="{{ url_for('index') }}">{{ t('nav_home') }}</a>
+      <a href="{{ url_for('track_view') }}">{{ t('nav_track') }}</a>
+      {% if current_user %}
+        {% if current_user.role in OFFICIAL_ROLES %}
+          <a href="{{ url_for('admin_dashboard') }}">{{ t('nav_official_console') }}</a>
+        {% else %}
+          <a href="{{ url_for('citizen_dashboard') }}">{{ t('nav_dashboard') }}</a>
+        {% endif %}
+        <a href="{{ url_for('logout') }}" class="btn btn-small btn-outline">{{ t('nav_logout') }}</a>
+      {% else %}
+        <a href="{{ url_for('citizen_login_view') }}">{{ t('nav_citizen_portal') }}</a>
+        <a href="{{ url_for('admin_login_view') }}">{{ t('nav_admin_portal') }}</a>
+      {% endif %}
+      <span class="lang-switch">
+        <a href="{{ url_for('set_language', lang='en') }}" class="{{ 'active' if lang == 'en' }}">EN</a>
+        <a href="{{ url_for('set_language', lang='kn') }}" class="{{ 'active' if lang == 'kn' }}">ಕನ್ನಡ</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="container main">{% block content %}{% endblock %}</main>
+
+<footer class="site-footer"><div class="container">{{ t('footer_text') }}</div></footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% from "macros.html" import status_badge, sev_badge, stat_cards with context %}
+{% block title %}{{ t('citizen_dashboard_title') }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ t('citizen_dashboard_title') }}</h1>
+    <p class="muted">{{ current_user.full_name }} · {{ current_user.ward_number }}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline" href="{{ url_for('citizen_statement') }}" target="_blank" rel="noopener">🖨 {{ t('btn_print_statement') }}</a>
+    <button class="btn btn-primary" id="toggleForm" type="button">＋ {{ t('btn_file_new') }}</button>
+  </div>
+</div>
+
+{{ stat_cards(stats) }}
+
+<section class="card hidden" id="complaintCard">
+  <h2>{{ t('form_heading') }}</h2>
+  <form id="complaintForm" enctype="multipart/form-data">
+    <label>{{ t('field_title') }}
+      <input name="title" required minlength="5" maxlength="150" placeholder="{{ t('field_title_ph') }}">
+    </label>
+    <div class="grid2">
+      <label>{{ t('field_category') }}
+        <select name="category" required>{% for v, k in CATEGORIES %}<option value="{{ v }}">{{ t(k) }}</option>{% endfor %}</select>
+      </label>
+      <label>{{ t('field_severity') }}
+        <select name="severity">{% for v, k in SEVERITIES %}<option value="{{ v }}" {{ 'selected' if v == 'Medium' }}>{{ t(k) }}</option>{% endfor %}</select>
+      </label>
+    </div>
+    <label>{{ t('field_desc') }}
+      <textarea name="description" rows="4" required minlength="15" maxlength="3000" placeholder="{{ t('field_desc_ph') }}"></textarea>
+    </label>
+    <label>{{ t('field_photo') }}
+      <input name="photo" type="file" accept="image/jpeg,image/png,image/webp">
+    </label>
+    <label>{{ t('field_address') }}
+      <input name="address" maxlength="255">
+    </label>
+    <div class="gps-row">
+      <button class="btn btn-outline btn-small" type="button" id="gpsBtn" data-done="{{ t('lbl_gps_attached') }}">📍 {{ t('btn_detect_gps') }}</button>
+      <span id="gpsStatus" class="muted small">{{ t('gps_consent') }}</span>
+    </div>
+    <input type="hidden" name="latitude"><input type="hidden" name="longitude">
+    <button class="btn btn-primary btn-block" type="submit">{{ t('btn_submit_complaint') }}</button>
+  </form>
+</section>
+
+<h2>{{ t('my_grievances_title') }}</h2>
+{% if not complaints %}
+  <p class="card muted">{{ t('no_grievances') }}</p>
+{% endif %}
+<div class="list">
+  {% for c in complaints %}
+  <article class="card item">
+    <div class="item-top">
+      <code class="tid">{{ c.tracking_id }}</code>
+      <span>{{ status_badge(c.status) }} {{ sev_badge(c.severity) }}</span>
+    </div>
+    <h3>{{ c.title }}</h3>
+    <p class="muted small">{{ t(CATEGORY_KEYS[c.category]) if c.category in CATEGORY_KEYS else c.category }} · {{ c.created_at[:10] }}{% if c.location_address %} · {{ c.location_address }}{% endif %}</p>
+    <p>{{ c.description }}</p>
+    {% if c.assigned_to %}<p class="small"><b>{{ t('lbl_assigned_to') }}:</b> {{ c.assigned_to }}</p>{% endif %}
+    {% if c.officer_remarks %}<p class="remark"><b>{{ t('lbl_remarks') }}:</b> {{ c.officer_remarks }}</p>{% endif %}
+    <div class="item-actions">
+      {% if c.photo_filename %}<a class="btn btn-small btn-outline" target="_blank" rel="noopener" href="{{ url_for('serve_complaint_photo', complaint_id=c.id, filename=c.photo_filename) }}">🖼 {{ t('view_photo') }}</a>{% endif %}
+      <a class="btn btn-small btn-outline" href="{{ url_for('track_view', q=c.tracking_id) }}">{{ t('lbl_timeline') }}</a>
+      {% if c.status == 'Rejected' and not c.pending_appeals %}
+        <button class="btn btn-small btn-primary" type="button" data-appeal="{{ c.id }}">{{ t('btn_appeal') }}</button>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+
+<div class="modal hidden" id="appealModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h3>{{ t('appeal_title') }}</h3>
+    <form id="appealForm">
+      <textarea name="reason" rows="4" required minlength="15" maxlength="2000" placeholder="{{ t('appeal_reason_ph') }}"></textarea>
+      <div class="actions">
+        <button type="button" class="btn btn-outline" data-close>{{ t('btn_cancel') }}</button>
+        <button type="submit" class="btn btn-primary">{{ t('btn_submit_appeal') }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

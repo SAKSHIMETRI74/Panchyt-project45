@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "macros.html" import stat_cards with context %}
+{% block content %}
+<section class="hero">
+  <span class="pill">● {{ t('live_badge') }}</span>
+  <h1>{{ t('hero_title') }}</h1>
+  <p>{{ t('hero_subtitle') }}</p>
+</section>
+
+<section class="gateways">
+  <article class="card gate citizen">
+    <h2>🧑‍🌾 {{ t('citizen_card_title') }}</h2>
+    <p>{{ t('citizen_card_desc') }}</p>
+    <a class="btn btn-primary" href="{{ url_for('citizen_login_view') }}">{{ t('citizen_card_btn') }}</a>
+  </article>
+  <article class="card gate official">
+    <h2>🏛️ {{ t('admin_card_title') }}</h2>
+    <p>{{ t('admin_card_desc') }}</p>
+    <a class="btn btn-dark" href="{{ url_for('admin_login_view') }}">{{ t('admin_card_btn') }}</a>
+  </article>
+</section>
+
+{{ stat_cards(stats) }}
+
+<section class="card quick-track">
+  <h2>🔍 {{ t('public_track_title') }}</h2>
+  <p>{{ t('public_track_desc') }}</p>
+  <form action="{{ url_for('track_view') }}" method="get" class="inline-form">
+    <input name="q" placeholder="{{ t('track_ph') }}" required maxlength="40" aria-label="{{ t('lbl_tracking_id') }}">
+    <button class="btn btn-primary" type="submit">{{ t('btn_track') }}</button>
+  </form>
+</section>
+{% endblock %}

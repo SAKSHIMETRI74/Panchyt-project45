@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "macros.html" import status_badge, sev_badge, stat_cards with context %}
+{% block title %}{{ t('admin_dashboard_title') }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ t('admin_dashboard_title') }}</h1><p class="muted">{{ current_user.full_name }}</p></div></div>
+{{ stat_cards(stats) }}
+
+{% if appeals %}
+<section class="card appeals">
+  <h2>⚖️ {{ t('appeals_desk_title') }} ({{ appeals|length }})</h2>
+  {% for a in appeals %}
+  <div class="appeal" data-appeal-id="{{ a.id }}">
+    <p><code>{{ a.tracking_id }}</code> · <b>{{ a.complaint_title }}</b></p>
+    <p class="small muted">{{ a.citizen_name }} (+91 {{ a.citizen_phone }}) · {{ a.created_at[:10] }}</p>
+    {% if a.complaint_remarks %}<p class="remark small"><b>{{ t('lbl_remarks') }}:</b> {{ a.complaint_remarks }}</p>{% endif %}
+    <p>{{ a.appeal_reason }}</p>
+    <input class="appeal-notes" placeholder="{{ t('lbl_notes') }}" maxlength="1000">
+    <div class="actions">
+      <button class="btn btn-small btn-primary" data-decide="UPHELD">{{ t('btn_uphold') }}</button>
+      <button class="btn btn-small btn-outline" data-decide="REJECTED">{{ t('btn_reject_appeal') }}</button>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+<h2>{{ t('admin_queue_title') }}</h2>
+<div class="filters">
+  <input id="adminSearch" placeholder="{{ t('search_ph') }}" aria-label="{{ t('search_ph') }}">
+  <select id="adminStatus">
+    <option value="">{{ t('filter_all') }}</option>
+    {% for s, k in STATUS_KEYS.items() %}<option value="{{ s }}">{{ t(k) }}</option>{% endfor %}
+  </select>
+</div>
+
+<div class="table-wrap card">
+<table id="adminTable">
+  <thead><tr><th>{{ t('col_id') }}</th><th>{{ t('col_title') }}</th><th>{{ t('col_citizen') }}</th><th>{{ t('col_severity') }}</th><th>{{ t('col_status') }}</th><th>{{ t('col_action') }}</th></tr></thead>
+  <tbody>
+  {% for c in complaints %}
+    <tr data-status="{{ c.status }}" data-search="{{ (c.tracking_id ~ ' ' ~ c.title ~ ' ' ~ c.citizen_name)|lower }}">
+      <td><code>{{ c.tracking_id }}</code><br><span class="small muted">{{ c.created_at[:10] }}</span></td>
+      <td>{{ c.title }}<br><span class="small muted">{{ c.category }}{% if c.location_address %} · {{ c.location_address }}{% endif %}</span></td>
+      <td>{{ c.citizen_name }}<br><span class="small muted">+91 {{ c.citizen_phone }}{% if c.false_strikes %} · ⚠ {{ c.false_strikes }}{% endif %}</span></td>
+      <td>{{ sev_badge(c.severity) }}</td>
+      <td>{{ status_badge(c.status) }}</td>
+      <td class="nowrap">
+        <button class="btn btn-small btn-primary" data-manage="{{ c.id }}">{{ t('btn_update') }}</button>
+        <button class="btn btn-small btn-outline" data-history="{{ c.id }}">{{ t('btn_history') }}</button>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6">{{ t('no_complaints_admin') }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<div class="modal hidden" id="manageModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h3 id="manageTitle"></h3>
+    <p class="small muted" id="manageDesc"></p>
+    <p id="managePhoto" class="small"></p>
+    <form id="manageForm">
+      <label>{{ t('col_status') }}
+        <select name="status">{% for s, k in STATUS_KEYS.items() %}<option value="{{ s }}">{{ t(k) }}</option>{% endfor %}</select>
+      </label>
+      <label>{{ t('lbl_assigned_to') }}<input name="assigned_to" maxlength="100"></label>
+      <label>{{ t('lbl_remarks') }}<textarea name="officer_remarks" rows="3" maxlength="1000"></textarea></label>
+      <label class="check"><input type="checkbox" name="mark_false"> {{ t('lbl_mark_false') }}</label>
+      <div class="actions">
+        <button type="button" class="btn btn-outline" data-close>{{ t('btn_cancel') }}</button>
+        <button type="submit" class="btn btn-primary">{{ t('btn_update') }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal hidden" id="historyModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h3>{{ t('audit_trail_title') }}</h3>
+    <div id="historyBody">{{ t('loading') }}</div>
+    <div class="actions"><button class="btn btn-outline" data-close>{{ t('btn_close') }}</button></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>window.COMPLAINTS = {{ complaints|tojson }};</script>
+{% endblock %}

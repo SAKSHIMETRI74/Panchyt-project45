@@ -1,0 +1,16 @@
+{% macro status_badge(status) %}
+<span class="badge st-{{ status|lower|replace(' ', '-') }}">{{ t(STATUS_KEYS.get(status, 'status_pending')) }}</span>
+{% endmacro %}
+
+{% macro sev_badge(sev) %}
+<span class="badge sv-{{ sev|lower }}">{{ t(SEVERITY_KEYS.get(sev, 'sev_medium')) }}</span>
+{% endmacro %}
+
+{% macro stat_cards(stats) %}
+<div class="stats">
+  <div class="stat"><b>{{ stats.total }}</b><span>{{ t('stat_total') }}</span></div>
+  <div class="stat ok"><b>{{ stats.resolved }}</b><span>{{ t('stat_resolved') }}</span></div>
+  <div class="stat work"><b>{{ stats.in_progress }}</b><span>{{ t('stat_progress') }}</span></div>
+  <div class="stat wait"><b>{{ stats.pending }}</b><span>{{ t('stat_pending') }}</span></div>
+</div>
+{% endmacro %}

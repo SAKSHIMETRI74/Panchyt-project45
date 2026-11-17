@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ t('statement_title') }}{% endblock %}
+{% block content %}
+<section class="card statement">
+  <div class="page-head">
+    <div>
+      <h1>{{ t('statement_title') }}</h1>
+      <p>{{ t('statement_for') }}: <b>{{ current_user.full_name }}</b> (+91 {{ current_user.phone }}) · {{ statement_date }}</p>
+    </div>
+    <button class="btn btn-primary no-print" onclick="window.print()">🖨 {{ t('btn_print_statement') }}</button>
+  </div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>{{ t('col_id') }}</th><th>{{ t('col_title') }}</th><th>{{ t('col_category') }}</th><th>{{ t('col_status') }}</th><th>{{ t('col_date') }}</th></tr></thead>
+    <tbody>
+    {% for c in complaints %}
+      <tr><td><code>{{ c.tracking_id }}</code></td><td>{{ c.title }}</td><td>{{ c.category }}</td>
+          <td>{{ t(STATUS_KEYS.get(c.status, 'status_pending')) }}</td><td>{{ c.created_at[:10] }}</td></tr>
+    {% else %}
+      <tr><td colspan="5">{{ t('no_grievances') }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endblock %}
